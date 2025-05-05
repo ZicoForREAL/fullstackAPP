@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import api from '../axios';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
-  const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -24,23 +24,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await api.post('/login', formData);
-      // Store the token
-      localStorage.setItem('auth_token', response.data.token);
-      // Set the token in the axios default headers
-      api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
-      
-      // Redirect based on user role
-      const userRole = response.data.user.role;
-      if (userRole === 'admin') {
-        navigate('/admin');
-      } else if (userRole === 'coach') {
-        navigate('/coach');
-      } else if (userRole === 'client') {
-        navigate('/client');
-      } else {
-        navigate('/');
-      }
+      await login(formData.email, formData.password);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
     } finally {
@@ -138,4 +122,4 @@ const Login = () => {
   );
 };
 
-export default Login; 
+export default Login;
